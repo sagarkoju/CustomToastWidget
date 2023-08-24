@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen>
                         Icon(
                           error ? Icons.error : Icons.check_circle,
                           color: error ? Colors.white : Colors.black,
-                          size: 30,
+                          size: _heightAnimation.value * 0.6,
                         ),
                         const SizedBox(
                           width: 20,
