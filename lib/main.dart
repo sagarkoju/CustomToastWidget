@@ -37,6 +37,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isBottomSheetVisible = false;
+  late AnimationController _animationController =
+      AnimationController(vsync: this);
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void _toggleBottomSheet(
     String text,
@@ -46,27 +63,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }) {
     setState(() {
       _isBottomSheetVisible = true;
+      if (_isBottomSheetVisible) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
     });
     if (_isBottomSheetVisible) {
+      _animationController.forward();
       // Show the bottom sheet
       showModalBottomSheet(
         context: navigatorKey.currentState!.overlay!.context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) {
-          return SlideTransition(
-            position: Tween<Offset>(
-                    begin: const Offset(
-                      0,
-                      -1,
-                    ),
-                    end: Offset.zero)
-                .animate(CurvedAnimation(
-              parent: ModalRoute.of(context)!.animation!,
-              curve: Curves.easeOut,
-            )),
-            child: Align(
-              alignment: alignment,
+          return Align(
+            alignment: alignment,
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: const Offset(0.0, -1),
+                  child: Opacity(
+                    opacity: _animationController.value,
+                    child: child,
+                  ),
+                );
+              },
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Container(
@@ -108,8 +131,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       );
       // Remove the bottom sheet after a delay
       Future.delayed(const Duration(seconds: 3), () {
-        Navigator.of(navigatorKey.currentState!.overlay!.context)
-            .pop(); // Close the bottom sheet
+        Navigator.of(navigatorKey.currentState!.overlay!.context).pop();
+        _animationController.reverse(); // Close the bottom sheet
       });
     }
   }
