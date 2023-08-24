@@ -35,23 +35,29 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   bool _isBottomSheetVisible = false;
   late AnimationController _animationController =
       AnimationController(vsync: this);
+  late Animation<double> _heightAnimation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(seconds: 2),
+    );
+    _heightAnimation = Tween<double>(begin: 0, end: 50).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+
     super.dispose();
   }
 
@@ -82,49 +88,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {
-                return Transform.translate(
-                  offset: const Offset(0.0, -1),
-                  child: Opacity(
-                    opacity: _animationController.value,
-                    child: child,
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Container(
+                    width: double.infinity,
+                    height: _heightAnimation.value,
+                    decoration: BoxDecoration(
+                      color: error ? Colors.red : Colors.green,
+                      border: Border.all(width: 2),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          error ? Icons.error : Icons.check_circle,
+                          color: error ? Colors.white : Colors.black,
+                          size: 30,
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Expanded(
+                          child: Opacity(
+                            opacity: opacity,
+                            child: Text(
+                              text,
+                              style: TextStyle(
+                                  color: error ? Colors.white : Colors.black),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 10.0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: error ? Colors.red : Colors.green,
-                    border: Border.all(width: 2),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        error ? Icons.error : Icons.check_circle,
-                        color: error ? Colors.white : Colors.black,
-                      ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      Expanded(
-                        child: Opacity(
-                          opacity: opacity,
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                                color: error ? Colors.white : Colors.black),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
           );
         },
